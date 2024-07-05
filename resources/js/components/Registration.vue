@@ -14,7 +14,13 @@ const registration = async () => {
     try {
         await axios.get('/sanctum/csrf-cookie');
         await axios.post("/register", register);
-        await router.push({name: 'get'});
+
+        const xsrfCookie = document.cookie.split('; ').find(row => row.startsWith('XSRF-TOKEN='));
+        const token = xsrfCookie.replace('XSRF-TOKEN=', '')
+            .replace('%3D', '') + '=';
+        localStorage.setItem('x_xsrf_token', token);
+
+        await router.push({name: 'user.personal'});
     } catch (error) {
         if (error.response && error.response.data) {
             console.error('Registration failed:', error.response.data);

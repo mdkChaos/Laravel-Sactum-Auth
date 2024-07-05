@@ -4,23 +4,30 @@ import {reactive} from "vue";
 import router from "../router.js";
 
 const userLogin = reactive({
-   email: '',
-   password: '',
+    email: '',
+    password: '',
 });
 
-const login = async () => {
-    try {
-        await axios.get('/sanctum/csrf-cookie');
-        await axios.post('/login', userLogin);
-        await router.push({name: 'get'});
-    } catch (error) {
-        if (error.response && error.response.data) {
-            console.error('Login failed:', error.response.data);
-        } else {
-            console.error('Login failed:', error);
+const login = () => {
+        try {
+            axios.get('/sanctum/csrf-cookie');
+            axios.post('/login', userLogin);
+
+            const xsrfCookie = document.cookie.split('; ').find(row => row.startsWith('XSRF-TOKEN='));
+            const token = xsrfCookie.replace('XSRF-TOKEN=', '')
+                .replace('%3D', '') + '=';
+            localStorage.setItem('x_xsrf_token', token);
+
+            router.push({name: 'user.personal'});
+        } catch (error) {
+            if (error.response && error.response.data) {
+                console.error('Login failed:', error.response.data);
+            } else {
+                console.error('Login failed:', error);
+            }
         }
     }
-};
+;
 </script>
 
 <template>
